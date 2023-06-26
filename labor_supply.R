@@ -21,7 +21,7 @@ variables <- c(
     wage_overtime_pt = "a11_4"
 )
 
-salary <- read_dta("./salary108.dta") %>% select(all_of(variables))
+salary <- read_dta("./rawdata/salary108.dta") %>% select(all_of(variables))
 
 salary <- salary %>% pivot_longer(everything(), names_to = c(".value", "emp_type"), names_pattern = "(workers|hours|overtime|wage_basic|wage_overtime)_(all|ft|pt)")
 
