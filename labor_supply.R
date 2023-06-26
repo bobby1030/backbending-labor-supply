@@ -53,7 +53,7 @@ plot_labor_supply_overtime <- ggplot(labor_supply, aes(x = overtime_per_labor, y
     facet_wrap(~ emp_type, nrow = 3) +
     stat_summary_bin(fun = mean, orientation = "y") +
     geom_smooth(method = "gam", se = FALSE, orientation = "y") +
-    labs(x = "每人加班工時", y = "時薪")
+    labs(x = "每人加班工時", y = "加班費")
 
 # Combine two plots
 plot <- ggarrange(plot_labor_supply, plot_labor_supply_overtime, ncol = 2, nrow = 1, label.x = c("正常工作", "加班"))
