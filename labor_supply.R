@@ -35,7 +35,7 @@ labor_supply <- salary %>%
     ) %>%
     mutate(
         emp_type = ordered(emp_type, levels = c("all", "ft", "pt"), labels = c("所有受僱員工", "全職員工", "部分工時員工"))
-    ) %>% 
+    ) %>%
     filter(
         hourly_wage <= 500,
         hourly_wage_overtime <= 500
@@ -43,14 +43,14 @@ labor_supply <- salary %>%
 
 # Labor supply in ordinary hours
 plot_labor_supply <- ggplot(labor_supply, aes(x = hours_per_labor, y = hourly_wage)) +
-    facet_wrap(~ emp_type, nrow = 3) +
+    facet_wrap(~emp_type, nrow = 3) +
     stat_summary_bin(fun = mean, orientation = "y") +
     geom_smooth(method = "gam", se = FALSE, orientation = "y") +
     labs(x = "每人正常工時", y = "時薪")
 
 # Labor supply in overtime hours
 plot_labor_supply_overtime <- ggplot(labor_supply, aes(x = overtime_per_labor, y = hourly_wage_overtime)) +
-    facet_wrap(~ emp_type, nrow = 3) +
+    facet_wrap(~emp_type, nrow = 3) +
     stat_summary_bin(fun = mean, orientation = "y") +
     geom_smooth(method = "gam", se = FALSE, orientation = "y") +
     labs(x = "每人加班工時", y = "加班費")
@@ -60,3 +60,21 @@ plot <- ggarrange(plot_labor_supply, plot_labor_supply_overtime, ncol = 2, nrow 
 
 ggsave("./labor_supply.pdf", plot, width = 210, height = 297, units = "mm", device = cairo_pdf)
 ggsave("./labor_supply.png", plot, width = 210, height = 297, units = "mm")
+
+
+# Extract binned csv for Wu
+labor_supply_overtime <- labor_supply %>%
+    filter(emp_type == "全職員工") %>%
+    select(overtime_per_labor, hourly_wage_overtime) %>%
+    # binning hourly wage
+    group_by(hourly_wage_overtime_bin = cut(hourly_wage_overtime, breaks = 30)) %>%
+    summarise(across(c(hourly_wage_overtime, overtime_per_labor), mean))
+
+# Write to csv
+labor_supply_overtime %>%
+    select(-hourly_wage_overtime_bin) %>%
+    rename(
+        "加班薪資率" = hourly_wage_overtime,
+        "人均加班工時" = overtime_per_labor
+    ) %>%
+    write_excel_csv("./labor_supply_overtime.csv")
